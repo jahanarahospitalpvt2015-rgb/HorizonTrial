@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard – Horizon Trials</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0fdf4;--bg2:#fff;--bg3:#f8fffe;
+  --sidebar:#134e4a;--sidebar-dk:#0f3d3a;
+  --green:#10b981;--green-lt:#34d399;--green-dk:#059669;
+  --teal:#0891b2;--teal-lt:#22d3ee;
+  --amber:#d97706;--amber-lt:#f59e0b;
+  --rose:#e11d48;--violet:#7c3aed;
+  --text:#064e3b;--muted:#6b7280;--border:rgba(255,255,255,.1);
+  --card-border:#d1fae5;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);display:flex;}
+::-webkit-scrollbar{width:5px;};::-webkit-scrollbar-thumb{background:rgba(16,185,129,.35);border-radius:3px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* SIDEBAR */
+.sidebar{width:260px;min-height:100vh;background:var(--sidebar);border-right:1px solid rgba(255,255,255,.08);
+  display:flex;flex-direction:column;flex-shrink:0;position:relative;z-index:50;transition:width .3s;}
+.sidebar.collapsed{width:70px;}
+.sidebar.collapsed .nl,.sidebar.collapsed .ss-title,.sidebar.collapsed .uinfo,.sidebar.collapsed .lt{display:none;}
+.sidebar.collapsed .logo-img{margin:0 auto;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08);}
+.logo-img{height:52px;width:auto;object-fit:contain;background:#fff;border-radius:10px;padding:4px 8px;flex-shrink:0;}
+.lt{font-family:'DM Serif Display',serif;font-size:1.05rem;color:var(--green-lt);white-space:nowrap;}
+.coll-btn{position:absolute;right:-13px;top:28px;width:26px;height:26px;border-radius:50%;
+  background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:11px;z-index:60;transition:background .2s;}
+.coll-btn:hover{background:var(--green-dk);}
+.sb-nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.ss-title{font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
+  color:rgba(255,255,255,.35);padding:8px 8px 4px;margin-top:8px;}
+.ni{display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:10px;
+  margin-bottom:2px;cursor:pointer;transition:all .2s;text-decoration:none;
+  color:rgba(255,255,255,.6);font-size:.87rem;font-weight:600;position:relative;}
+.ni:hover{background:rgba(16,185,129,.15);color:var(--green-lt);}
+.ni.active{background:linear-gradient(135deg,rgba(16,185,129,.25),rgba(16,185,129,.08));
+  color:var(--green-lt);border:1px solid rgba(16,185,129,.2);}
+.ni.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:3px;height:60%;background:var(--green-lt);border-radius:0 3px 3px 0;}
+.ni-icon{font-size:1.05rem;flex-shrink:0;width:20px;text-align:center;}
+.nbadge{margin-left:auto;color:#fff;font-size:.63rem;font-weight:800;padding:2px 7px;border-radius:999px;}
+.nbadge.gr{background:var(--green-dk);}
+.nbadge.rd{background:var(--rose);}
+.nbadge.am{background:var(--amber);}
+.sb-user{padding:14px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px;}
+.uav{width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.88rem;color:#fff;}
+.uname{font-size:.82rem;font-weight:700;color:#fff;}
+.urole{font-size:.7rem;color:rgba(255,255,255,.45);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;height:100vh;overflow:hidden;}
+.topbar{height:64px;background:#fff;border-bottom:1px solid var(--card-border);
+  display:flex;align-items:center;padding:0 26px;gap:14px;flex-shrink:0;
+  box-shadow:0 2px 12px rgba(16,185,129,.08);}
+.tb-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--text);}
+.tb-crumb{font-size:.76rem;color:var(--muted);margin-left:6px;}
+.tb-sp{flex:1;}
+.sb-inp{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--card-border);
+  border-radius:10px;padding:7px 13px;width:240px;transition:border-color .2s;}
+.sb-inp:focus-within{border-color:var(--green);}
+.sb-inp input{background:none;border:none;outline:none;color:var(--text);font-size:.83rem;font-family:'Nunito',sans-serif;width:100%;}
+.sb-inp input::placeholder{color:var(--muted);}
+.tb-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--card-border);
+  background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.95rem;transition:all .2s;position:relative;color:var(--muted);}
+.tb-btn:hover{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08);}
+.ndot{position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;
+  background:var(--rose);border:1.5px solid #fff;}
+.tb-av{width:38px;height:38px;border-radius:10px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.87rem;color:#fff;cursor:pointer;
+  border:1px solid rgba(16,185,129,.3);}
+.dd{position:relative;display:inline-block;}
+.ddm{position:absolute;top:calc(100% + 8px);right:0;min-width:175px;
+  background:#fff;border:1px solid var(--card-border);border-radius:12px;
+  padding:6px;z-index:200;display:none;box-shadow:0 16px 40px rgba(16,185,129,.15);}
+.ddm.open{display:block;}
+.ddi{padding:9px 12px;border-radius:8px;font-size:.82rem;cursor:pointer;
+  color:var(--muted);transition:all .15s;display:flex;align-items:center;gap:8px;}
+.ddi:hover{background:rgba(16,185,129,.08);color:var(--green);}
+.dds{height:1px;background:var(--card-border);margin:4px 0;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:26px;}
+.tab-panel{display:none;}.tab-panel.active{display:block;animation:fadeUp .4s ease both;}
+
+/* WELCOME */
+.wc{background:linear-gradient(135deg,#064e3b,#065f46,#047857);border-radius:18px;
+  padding:26px 30px;margin-bottom:22px;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:space-between;}
+.wc::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 50%,rgba(52,211,153,.15),transparent 60%);}
+.wc::after{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;
+  border-radius:50%;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.1);}
+.wt{position:relative;z-index:1;}
+.wt h2{font-family:'DM Serif Display',serif;font-size:1.55rem;color:#fff;margin-bottom:5px;}
+.wt h2 span{color:var(--green-lt);}
+.wt p{color:rgba(255,255,255,.7);font-size:.87rem;line-height:1.6;max-width:420px;}
+.mbadge{position:relative;z-index:1;background:rgba(52,211,153,.15);border:1px solid rgba(52,211,153,.25);
+  border-radius:14px;padding:18px 26px;text-align:center;flex-shrink:0;}
+.mpct{font-family:'DM Serif Display',serif;font-size:2.6rem;color:var(--green-lt);line-height:1;}
+.mlbl{font-size:.72rem;color:rgba(255,255,255,.55);margin-top:4px;text-transform:uppercase;letter-spacing:.08em;}
+.mbar{height:4px;background:rgba(255,255,255,.15);border-radius:4px;margin-top:10px;width:120px;}
+.mfill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-lt));border-radius:4px;width:94%;}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:22px;}
+.sc{background:#fff;border:1px solid var(--card-border);border-radius:14px;
+  padding:18px;transition:transform .2s,border-color .2s;cursor:pointer;}
+.sc:hover{transform:translateY(-2px);border-color:var(--green);}
+.sc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.sc-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;}
+.ic-gr{background:rgba(16,185,129,.12);}.ic-tl{background:rgba(8,145,178,.12);}
+.ic-am{background:rgba(217,119,6,.12);}.ic-vi{background:rgba(124,58,237,.12);}
+.sc-chg{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:999px;}
+.cup{background:rgba(16,185,129,.12);color:var(--green-dk);}
+.cdn{background:rgba(225,29,72,.12);color:var(--rose);}
+.sc-num{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--text);}
+.sc-lbl{font-size:.76rem;color:var(--muted);margin-top:2px;}
+
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 340px;gap:18px;margin-bottom:20px;}
+.sc2{background:#fff;border:1px solid var(--card-border);border-radius:16px;padding:20px;}
+.sc2-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.sc2-head h3{font-family:'DM Serif Display',serif;font-size:.95rem;color:var(--text);}
+.va2{font-size:.76rem;color:var(--green-dk);cursor:pointer;font-weight:700;text-decoration:none;}
+
+/* TRIAL ITEM */
+.ti{display:flex;gap:13px;padding:13px;border-radius:12px;margin-bottom:9px;
+  background:var(--bg);border:1px solid var(--card-border);transition:all .2s;cursor:pointer;}
+.ti:hover{border-color:var(--green);background:#ecfdf5;}
+.tscore{width:50px;height:50px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--green-dk),var(--green));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Serif Display',serif;font-size:.9rem;color:#fff;}
+.tscore.hi{background:linear-gradient(135deg,#047857,#059669);}
+.tscore.md{background:linear-gradient(135deg,var(--amber),#f59e0b);}
+.tinfo{flex:1;min-width:0;}
+.ttitle{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:3px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tmeta{font-size:.73rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+.ttags{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.ttag{font-size:.63rem;font-weight:800;padding:2px 7px;border-radius:999px;}
+.tg-cancer{background:rgba(225,29,72,.1);color:#be123c;}
+.tg-prostate{background:rgba(124,58,237,.1);color:#6d28d9;}
+.tg-approved{background:rgba(16,185,129,.12);color:var(--green-dk);}
+.tg-colorectal{background:rgba(217,119,6,.1);color:#92400e;}
+.tbtn{align-self:center;padding:5px 13px;border-radius:8px;font-size:.73rem;font-weight:800;
+  border:none;cursor:pointer;font-family:'Nunito',sans-serif;flex-shrink:0;
+  background:rgba(16,185,129,.12);color:var(--green-dk);transition:all .2s;}
+.tbtn:hover{background:var(--green);color:#fff;}
+.tbtn.app{background:rgba(8,145,178,.1);color:var(--teal);}
+.tbtn.app:hover{background:var(--teal);color:#fff;}
+
+/* NOTIF */
+.notif-item{display:flex;gap:11px;padding:11px;border-radius:10px;
+  background:var(--bg);border:1px solid var(--card-border);margin-bottom:7px;cursor:pointer;transition:all .2s;}
+.notif-item:hover{border-color:var(--green);}
+.notif-item.unr{border-left:3px solid var(--green);}
+.ndot2{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.nd-gr{background:var(--green);}.nd-tl{background:var(--teal);}
+.nd-am{background:var(--amber);}.nd-rd{background:var(--rose);}
+.ntext{font-size:.81rem;color:var(--text);line-height:1.5;}
+.ntime{font-size:.68rem;color:var(--muted);margin-top:2px;}
+
+/* PROGRESS */
+.ps{display:flex;gap:13px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--card-border);}
+.ps:last-child{border-bottom:none;}
+.pdot{width:30px;height:30px;border-radius:50%;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;}
+.pd-done{background:rgba(16,185,129,.15);color:var(--green-dk);border:1px solid rgba(16,185,129,.25);}
+.pd-active{background:rgba(8,145,178,.15);color:var(--teal);border:1px solid rgba(8,145,178,.25);}
+.pd-pend{background:var(--bg);color:var(--muted);border:1px solid var(--card-border);}
+.pinfo h4{font-size:.83rem;font-weight:700;color:var(--text);}
+.pinfo p{font-size:.73rem;color:var(--muted);margin-top:2px;}
+
+/* FORMS */
+.pf{margin-bottom:14px;}
+.pf label{display:block;font-size:.7rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--text);margin-bottom:5px;}
+.pf input,.pf select,.pf textarea{width:100%;padding:9px 13px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--card-border);color:var(--text);
+  font-size:.85rem;font-family:'Nunito',sans-serif;outline:none;transition:border-color .2s;}
+.pf input:focus,.pf select:focus,.pf textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(16,185,129,.1);}
+.pf textarea{resize:vertical;min-height:75px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.btn{padding:9px 18px;border-radius:10px;font-size:.83rem;font-weight:800;
+  cursor:pointer;border:none;font-family:'Nunito',sans-serif;transition:all .2s;}
+.btn-gr{background:linear-gradient(135deg,var(--green-dk),var(--green));color:#fff;
+  box-shadow:0 4px 14px rgba(16,185,129,.35);}
+.btn-gr:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(16,185,129,.45);}
+.btn-ol{background:transparent;border:1px solid var(--card-border);color:var(--muted);}
+.btn-ol:hover{border-color:var(--green);color:var(--green);}
+.btn-rd{background:rgba(225,29,72,.1);color:var(--rose);border:1px solid rgba(225,29,72,.15);}
+.btn-rd:hover{background:var(--rose);color:#fff;}
+.btn-sm{padding:5px 13px;font-size:.75rem;}
+.btn-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px;}
+
+/* TOGGLE */
+.trow{display:flex;align-items:center;justify-content:space-between;
+  padding:11px 0;border-bottom:1px solid var(--card-border);}
+.trow:last-child{border-bottom:none;}
+.tinfo h4{font-size:.84rem;font-weight:700;color:var(--text);}
+.tinfo p{font-size:.73rem;color:var(--muted);margin-top:1px;}
+.tog{width:44px;height:24px;border-radius:999px;background:var(--bg3);
+  border:1px solid var(--card-border);cursor:pointer;position:relative;transition:background .2s;}
+.tog.on{background:linear-gradient(135deg,var(--green-dk),var(--green));border-color:var(--green);}
+.tog::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;
+  background:#fff;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.tog.on::after{left:22px;}
+
+/* BADGE */
+.badge{font-size:.66rem;font-weight:800;padding:3px 9px;border-radius:999px;}
+.b-gr{background:rgba(16,185,129,.12);color:var(--green-dk);}
+.b-tl{background:rgba(8,145,178,.12);color:var(--teal);}
+.b-am{background:rgba(217,119,6,.12);color:var(--amber);}
+.b-rd{background:rgba(225,29,72,.12);color:var(--rose);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;
+  display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff;border-radius:20px;padding:26px;width:460px;max-width:90vw;max-height:85vh;overflow-y:auto;
+  box-shadow:0 24px 60px rgba(16,185,129,.2);border:1px solid var(--card-border);}
+.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.mhead h3{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--text);}
+.mc{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1.1rem;
+  width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.mc:hover{background:rgba(225,29,72,.1);color:var(--rose);}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;z-index:400;
+  background:#fff;border:1px solid var(--card-border);border-radius:12px;
+  padding:12px 16px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 16px 40px rgba(16,185,129,.2);transform:translateY(80px);
+  opacity:0;transition:all .3s;font-size:.84rem;color:var(--text);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* HISTORY ITEM */
+.hi{display:flex;gap:13px;padding:12px;border-radius:12px;
+  background:var(--bg);border:1px solid var(--card-border);margin-bottom:9px;}
+.hi-icon{width:40px;height:40px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.hi-gr{background:rgba(16,185,129,.1);}.hi-am{background:rgba(217,119,6,.1);}
+.hi-tl{background:rgba(8,145,178,.1);}.hi-rd{background:rgba(225,29,72,.1);}
+.hi-info h4{font-size:.83rem;font-weight:700;color:var(--text);}
+.hi-info p{font-size:.73rem;color:var(--muted);margin-top:2px;}
+.hi-date{font-size:.7rem;color:var(--muted);margin-left:auto;white-space:nowrap;}
+
+.prof-av{width:78px;height:78px;border-radius:18px;margin:0 auto 14px;
+  background:linear-gradient(135deg,var(--green),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800;color:#fff;}
+
+@media(max-width:1100px){.sg{grid-template-columns:repeat(2,1fr);}.g2{grid-template-columns:1fr;}}
+@media(max-width:768px){.sidebar{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAEtAecDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACikzSbqQDqKbuPpSg5pgLRWT4j8U6T4Q0yTUda1C20yxj4M1zIEGfQZ6k9gMk+leUSfHnxD42Yp8NvBF5rdtnA1rVj9jsyP7yBiGcfkfagD2zNJu9a8SXwJ8ZvFWW1rx/pvheFuTaeH7DzSPbzJMMPzNTxfs3vP8+p/ErxzfTHr5ereUn4LtOPwNAHs+aCcV5Af2aNJwdvjHxqhP8AEuttkfmtU5/2a5lUmw+J/jy1OOC+rlx+gWgD2rdRnivEE+EnxT8PoW0T4sy6hgfLb61pqyqw9GkJdvyFR/8ACwfjH4IOfEfgSz8U2KcPeeGZz5uPXyWyzH2CigD3WivNPBX7Q/grxtcfYk1L+x9WB2tpmrr9mnVv7uCcMfYEn2r0nfkcUAOooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiobq5S1tpZ5DiONC7H0AGTQB5Z8YPjj/wgeoWfhzQNLfxH4z1EZttOi+7GDnDykHIHBOB2UklRzXmur+EvH16q3vjz4zQ+DLiUbk03S3ESoD23K8eSP8AgX1PWsX4e+Jn0nwD41+MV/Es/iXXb57SwMgDeRECFVB7AjBHcRLXheqapd63qE19f3Ml3dzNukmlOWY/WvKxmOWFfKldn3/DXCk89jKtOfLTTtfq2fSOn6b8U/BtiNU8HfEC1+KOmQHfNp93iSaRRyQrFnYnHo4J7Ka6OP8Aav07X/D9nB4c0a6vvHF9KbWLw7IpDQTAfM0r8Dyx13cZwc7cMV+XfBnjPU/AmvW+qaXcPDLGw3xg/LMndGHcH/POK9+1S7s/Cnx7+HvjjSIxBp3jmD7HexbR80jiPDexJaLPc7G9a0weMWKTurNHHxJw3UyCrH3uaEtnt8md94R+Aq3upp4k+It9/wAJj4mJ3pDNk2Njk52QxHggepHOM4B5r2EIFAAAAHQDtRtFOr0T4wTAoxS0UAFJilooATFG2looA5nxr8NvDPxEsvsviHR7bUlAwkki4lj/AN2QYZfwNeVzeCvHvwRH2rwbqFx438MRj974b1SXddQp/wBO8vfA4C47cBia96poQA96AOL+Gnxc8P8AxU06WfSJ2jvLfC3em3K7Lm1boQ6emeNwyDgjOQa7avJPir8HJdb1GPxf4NnXQvHViC0dxGAsd6Bj91MOhz0BP0OQBje+EPxUh+J2hTNNatpmv6dJ9l1XS5Bh7aYex52tg4PsR1BoA72iiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqtqFmuoWNxbOcJNG0bEehBB/nVmkxQB8beBNEuvFX7PPiPwUkefEfhbVJDJZD7zKHJOB1OSJVHfK14ceGIIIwcc8V9T/ABP0O80n4vXHiX4d3tvF4zgt1/tPQro7E1SEgcrkgMcAAjIPAIION3Ea142+E3jDUZf+E10LWPh/4jP/AB9KsDlS/cgKpJz6mME+9eJjcF9afPTeqP1HhbidZBTeGxcHyS95Nef5o8X0vTLnWNQt7Cyga4uriQRxxJ1Zj/h619G+KtKM3xM+C3gC3kW6vNBKanfMnKoIwjjJ7Z8puP8AaX1GcXw18RPC2iXE1j8HvBuo+KPEsq+WNTvoiIYB/eJY5UcdD5YPc8Yr1j9n74br4cl1vxHrOrQ+IPGupTmPUruB96W5AVjAp9jtzjAGFAGFrXA4P6qm5O7Z5/FXEaz6UY0YtU4d92z2iikzQSfSvWPz4WikzRQAtFFN3c0AOopM03fzjigB9FFM35PHI9aAF2D1NeE/GeyPwq8daL8VNOV0tGlj03xFBGPlltnIVJj7odv1Oweufdt3X1Fc98Q/C6eNPA2vaG6q5vrOWFN3QOVOxvqG2n6igDoI5RIiupDKwyCpyCPan15t+zv4jfxT8GPCt7KxeeO1+ySZ67oWaLn3wgP416ODmgB1FN3U6gAooooAKKKTNAC0U0Nn0p1ABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRTXbYjMegGaAHUV4Df/tfeH7G+uLY6RqbNDI0ZIEfUHB/j9ag/4bI8Pf8AQF1T8ov/AIuuJ43DrTnR9PHhnOJJSjh5WZ9C0V89f8Nk+HuB/Yuq5+kf/wAXTo/2xdAmkVI9D1V3YhVVUjJJPYDdzQsbh3opocuGM4iuaWHkl8jyf9p2eW0+L800MjwyrBEyyKxUqRk5B/ziuh+GUHxQ+IVpbxzG2udDx8t3r1ok4K99gYbn+p4PrXofiHwZ4XudTl+JnjonTLBYIzHpl+ANjDON4Une54wgz9CTx89fF79q/XfGgl0rwyH8NeHuUXyG23M6f7Tj7o/2V6d2auSlhJ+2lVcnZ9Ee9juIcOsuo4CnRUpxik5NXs/I+ivFvxU8DfCTSzpWu6++sXyj59K0yJAQe6lIgqoD/dkbJ968N8Q/to6rDEbHwX4c07w5YA7Y2dBLIB6hVwi/TDfU183E7iSeWPUnvXsHwH+NujfB5L+S+8Jx67qM8qvBel0SWBQuCqsyEjn0NetZH55Kcpbs3rLx7+0L41zPZHX5YW6SW+nLBH+DCNQfzrXtfC37TExMsc+tjPP73U4F/wDHWkrsP+G+NPAx/wAIZcY/7CC//G6P+G+LD/oTLj/wYL/8bqiDHsdf/aa8MkGfTrrU4k/5Yz29tPn/AIFHhj+dbemftjeIvCtzHbfEHwHdabuODPbRSW7D6RzcN/32KZ/w3xYf9CZc/wDgwX/43XTfDX9qvTPjD4ysfCUvhJoI9QWUM9zcrMmEjaQgps5zsx+NAHq/w/8Ai/4U+J1u0mgatDczIu6S0kzHPGP9qNsHHuMj3rxv/goP8avFfwB/Zt1Lxf4Kv4tO12DULSBJ5rdJ1CPJhxtcEfpXT+NP2T/CWtXS6l4be48F67G3mQXekuVjRx0PlZGB/uFa+Wf2+bT4q6p+zVq3gPxNpEetXDXtrPp/iCyICXXlPuMcgOAJCoYjO0naRhvvUAfFn/D2D9pL/ob9P/8ABJaf/G6/bL4H+Jb/AMbfBXwB4i1aUT6rq/h/T9Qu5UUIHmlt45HYKMAAsxOBxX8ylzaS2dxJbzxSQzxsUeKRdrKwOCCDyD7V/Sv+zH/ybZ8J/wDsUtJ/9I4qAPS6/E746/8ABTX9oDwP8bviH4c0jxVYwaTo/iLUdPs4X0e1cpDFcyJGpZkJOFUDJOeK/bGv5pv2o/8Ak5n4uf8AY36v/wClstAH6qf8Euf2ufib+05r3xBtfiBrNvqsOkW1nJZiCxhttjSNKHz5ajOdi9a+vvjn+0B4H/Zz8FS+J/HGsx6ZYglLe3Qb7m8l6+VDGOXb9B1YgAmvy0/4JF/EjQ/hBpPx48ZeJLn7JomjaRYXVzIBliA84VFHd2Yqqr3ZgK+T/wBor9oLxb+1v8Y5fEGtOw+1Tiz0jSUctFYQM+I4U9TyCzYG5iTgcAAH018Vv+CjfxO+EsUXhX4cPpvh/R7tDq0d7c2S3N6n2h2cJ+8LRABccBCc55rwO4/4KC/tE3Vy87/FbXFdm3ER+UiZ9lVAoHsBitab9nzxv+1F+0HqXhT4faWt/wD2Vb29tcX87+Va2UaoAWmkwdvzbgFGWO04Bwa+kbL/AIIieM5NNWS6+JuhQ6htBaCGwmkiB7gSEqSPfZ+FAHm3wp/4K8/G/wAE6hbDxTLpfj7SVYCaC/tEtLgp3CTQKoVvd0ce1fqn+zB+2P8ADz9q7QXuvCd+1prVqga/8P6hhLy16AtgEiSPJ4dCRyAdp4r8Rf2nv2KviV+yjeWr+LbK2vtDvH8u117SJGms5JME+WSyqyPgZ2sozg7S2DjyXwB8QfEHwu8Y6V4q8L6nNpGu6ZOJ7a7gOCrDqCOjKwyrKchlJBBBIoA/qGpa8V/ZF/aT0z9qf4KaR4zs40tNSDGy1ewQ5FpeIAZFGTnYwZXXqdrrnkHHtVABXzt+3H+1ZH+yV8GH8R21lFqniTUrgado9nPnyTOVZjJLgg+WiqSQCCxKrld25fomvl3/AIKDfsp6h+1b8FYdI8P3MFt4q0W9Gpaaty+yK4OxkeBm527lbg9NyLnAJNAH5q/Dn/grj8dPDnjq21PxTqtj4t8ONMDdaI+nW9sBEWBYQyxIrq4GQpcuOmQa/bLwb4t07x54R0PxLpEpn0rWbGHULSVhtLQyxh0JHY7WHHavwY+HX/BNT49+OvHEGgX3gm78K2YmCXes6uVW1gT+J1KsfNI7LHuye4GSP3d+Hfgmy+GvgDw34S01nfT9C0230y3eU/O0cMSxqW9yFGfegDpKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKiuebeT/dP8qlqK5/495P90/ypPYqO6PzZ8QnHiDU/wDr6k/9DNZ2K0fEX/Iwan/19S/+hGs7FfnU/iZ/aOE/3en6L8gA55xX0b8BvhxpfhHw1P8AEfxcyQWVtEZ7UTL8qIOkmD1Zjwo/2uMkjHlnwY8AH4ieOrPT5U3afD/pF4R08tSPl/4EcL9M1sftd/F1df15PBWjyhNF0Z9t15Rws9yOCv0j5Uf7W70Fe9leFU37aa22PyTjzP5UI/2bh3ZvWT8u3zPOvjb8a9V+MfiM3E++00a2YrZaeG4iX+83q57/AJV5xRRX1B+DhR+A5oooAKKKKACvYf2SP+S/eGf926/9JZa8er2H9kj/AJL94Z/3br/0lloA/RTFfHH/AAVivrnSf2P9TvLK4ktbuHWNPeOaFirowl6gjoa+yK+MP+CuX/JmWs/9haw/9G0Afkbb+JPD/wAa4I7HxTLDoHjBUEdtrqJtgvOMBLgDAB7bvyxwp/Yr4X/to/Bf4PfCD4e+FfF/jq20bW9M8O2FlcwTWN2V8yK3jjk2uIirgMpGQSK/A8tmvQfDHxevdO0hNB16yg8U+HBwLK+JEkH/AFxlHzRn0xkDtQB+6H/DyL9m4j/kqWn+nNlef/Ga/Cz4/wCv6d4v+O3xH13SLoXuk6p4k1K+tLlFIE0Mt1I8bgMAQCpBwQDz0rQk8JeAPFZ83QfFT+HJmBJ0/wAQRHap/wBmdARt+ozRb/Ai7unPl+MPB7R5/wBYNXBX9Fz+lAHPaJ49u9D+G3ijwrayPFFr97YT3JU8SRW4uCI2Hcb5Y2+sYNdT8H9Jg8LQXPxD1yMDTNLyunxPwb28IIVV9QvJJ7EZ/hOF/wCEO8A+BW+0a/4kXxZdp93SdB/1TEf35zxt+mD6ZrmfGvxJvfHOq2TXkMVro9jhLXSrQbYYIwRlR6kgct/IcUAfv/8AsX/Ay1+BPwI0KwkgT/hJtYjGs+ILwriSe+nG+QE9wmfLXpwmcZJr3YqDUVvNFcwRzQuJIpFDo6nhgRkEfXOamoA434ufC3QvjV8N9e8FeI7VbrSNXtmt5OAWiY8pKno6MAynsVFfzS+OfCF74A8a6/4X1IAajouoXGm3O3p5sMjRtj2ypr+ovH41/OH+2pc211+1r8XJLQgw/wDCS3yEqcguJWD/APjwagD13/gnX+23ov7Ieu+MYPF1lrGqeHNctoGWDRoopZYruJiFbbLJGApSRwxBzlUGCBkfdelf8FmfgrrGqWdhB4X8eLNdTJAjSWFkFDMwUZP2zpk1+J45zz/9an2t3NZXMVxBI0U8LiSORDyjA5BHvmgD98P2mv8AgpR8LP2aPEcvhi7W/wDFniqEf6TpuiqhWzJAIWaV2CqxH8K7mHGQMjPivhz/AILZfDa58z+3vAHirTCAdv8AZz215nnjO+SLHH1r4P8AhP8A8E//AI9ftCeH08Z6X4expmqlrmLVNc1COB70lstKFZjIwYnO8rhs5BPWuY+JP7G/xO+CnhbxNrnj7w3ceHbbSJ7S0hkkdJIryWdn2+VIhKOqpFIW2nKkoCBmgD9Mv+H1PwPzn/hFfiBn/sHWP/yZXR/Eb/grf8IPhj4/8SeENU8N+N7jUdB1K40y5ls7GzaF5YZGRijNdKSpKkjIBx1Ar8Nc1+k3x4/4JT/Gn4l/G3x/4t0i78LLpWu69e6lai51CVJRFNO8i71EJAOGGRnrQB9B/wDD6v4If9Ct8QP/AAXWP/yZR/w+r+CH/QrfED/wXWP/AMmV+c37R37BvxB/Za8IWfiHxvq/hlYL25Fpa2dhfyTXM74LMVQxL8qgfMxIAyB1ZQfnHHHXmgD9zfhl/wAFY/hf8XfHuh+DvDPgr4gX2uazdLa2sQ0+y2gnku5F2dqKoLM3ZVJPSvdPj1+158K/2bYEXxx4ogstTlj82DSLVGuL2ZezCJMlVPOGfapwea/NH4EeH/8AhgT9k69+PWt6dHJ8UvG6LpfhCxvI9wsbaRS/2h1Pd0UyH/ZES8eY4r4A8UeKdY8b+ItQ17XtSudX1nUJmuLq9u5C8s0h6szH/IAwKAP1q1//AILc+B7a+dNF+G+v6jaBsLNe3sNq7D12KJAPpurtvhh/wWK+DnjK+jsvE+na34FldtouryEXdoPTLxEuOfWPA6k9cfnX8Hf+Cbnxy+NnhK28TaV4dttI0a8j82zn127Fq10hGVZI8M+1gQQxUKwIIJHNeR/G39n7x9+zt4oXQPHvh+fRbyVDJbzErJb3ScZaKVSVcDIzg5UkAgE4oA/pK8KeLtF8deH7LXfDuq2et6Nep5ltfWEyzQyrnGQynHUEEdiCDzXw9ef8FoPgpY3c9tJ4X8emSF2jYpp9kRkHHX7ZX59/sA/tjax+y/8AFSxsdQvpJvh3rlykGsWErEx2xbCi7jGfldMgtj76Ag8hSvzL4iP/ABUGqc5/0mXn/gZoA/eTSP8Agpz8Fb/4MzfEi9u9W0PT/wC0ZtLtdH1C2iOp3s0Uccj+TDFK4KATIN7MqgnBIyM+ESf8Fu/BK6rJGvw019tNDYW4a+gExGepjwQD7b/xr86P2ZP2U/HX7V/i6fRPB1vBDb2KLLqGr6gzJaWaEnbuYKSWbB2ooJOGPABI9P8A2qf+CbvxF/Zd8Ip4uu9Q03xT4XR0hu73TA6PZO7bVMkbDhGYqoYE/MQCBkZAP1r/AGav27fhV+1HN/Z3hnVJ9M8Sqhkbw/rUawXZUDJaPDMkoHJ+RiQBkgV9DZr+Wvw14n1Xwb4h03XdEvptM1jTrhLq0vLdtskMqEMrKfUEV/Sv8BviI/xa+C3gfxnKixXGu6Na308aD5UmeJTIo9g+4D6CgDvqKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKZKm+Jl7kEU+igNj5R1T9kPWr7VLu5TW7NVmlaUAxNwCc+tVv+GONc/6Dtl/36b/GvrXbzS4rzHl2Hetj7iHGecwioxqKy8kfOVp4Zf8AZf8AhP4s12e8hvdZmAS2kVMAOfliXBPOGZmPqAa+Wvhh8FvFPxqm1SfRmtz9kZWuLi+lZVdn3YAIB3Hgk/h6177+3l4oaOy8MeHI3OJZJL+dB/sjZGf/AB6T8hXrH7LPgpPB3wZ0UtHsvNUU6lcN3Yyfc/KMIPzrvp0404qEdkfJ4zF1sfXliK7vKW58CeN/B9/4A8U32gamYjfWTKsjQMWQkqG4JAzwRWFXqX7Tw/4vx4t/67x8/wDbCOvLa0OMK9I+FfwE8S/GCwvrvQpLBIrORYpPtcxQkkZGMKc8V5vX2f8AsFj/AIpXxX/1+w/+gGgDzH/hiP4h/wDPbRf/AALf/wCN0f8ADEfxD/57aL/4Fv8A/G6+9MUYoA+C/wDhiP4h/wDPbRf/AALf/wCN133wI/Zd8Y/Df4p6N4h1aXS2sLQTiQW9wzud8LoMAoO7CvrbFGOKAFr4w/4K5f8AJmWs/wDYWsP/AEbX2fXxh/wVy/5My1n/ALC1h/6NoA/Cav6W/wBmNB/wzb8J/bwlpP8A6RxV/NJX9Lv7Mf8AybZ8J/8AsUtJ/wDSOKgD0raBX81H7UbH/hpj4uj/AKm/V/8A0tlr+liv5pv2o/8Ak5n4uf8AY36v/wClstAEHgv4W3vjL4N/EPxTp9u1xJ4UudLnutoyY7Sc3MTv+EnkZ9AST0rzkk96/Sn/AIIx+G9M8az/ABu0DW7OPUNI1PSLKzu7WUZWWKQ3Kup78gmvmf8AbT/Yt8S/sleO5I5I5tU8C6jMx0fXgnysOvkTY4WZR24DgFlGMhQD9VP+Cbv7WWifHz4J6L4Zu7+OLx74XsY7DULCV8S3EEQCR3aZ5ZWUKHI+6+QQAy5+vy2M1/LZ4d8Sat4R1q01jQtTu9G1azcSW1/YTtBPC/TKOpBU89Qa+g7H/gpL+0lp+nmzi+KN80R43T2FnLL/AN/HhL/rQB+2P7VH7SPh/wDZf+EWreLdYnhfUBG0Ok6Yz4e/uyp8uMAc7QeXYfdUMeuAf5xda1m88Razf6rqM7XWoX9xJdXM7/ekldizsfckk/jW78Qvih4u+LOunWPGXiTU/E+p7di3Gp3LTMi9dqAnCL/sqABXY/s1fszeMP2oviHbeF/CtoywqVk1HVpUJttOgzzJIe567UHLHgY5IAM+2+EN5/wzlqfxPuYnisV8U2Xh2ycjiZmtLue4x/u+Xb/99n0rh/DOnxat4j0qxnz5NzdxQvtODtZwpx74Nfq7/wAFO/g9oHwF/YK+G/gbw1CY9L0nxXaxiSQDzLiQ2V+0k0hHV3csx7c4AAAA/KvwN/yO3h7/ALCNv/6NWgD+oDSdJs9C0qz03T7aOzsLOFLe3t4htSKNFCoqjsAAB+FfFH/BYcY/ZB4/6GGx/wDQZq+46+Hf+CxH/JoP/cw2P/oM1AH4c1/Unrmv6f4X0C+1nVryKw0vT7d7q6u522xwxIu53Y9gACTX8tlfqb/wVx/bB85v+FG+E77MaeXceJ7mBvvHh4rMH0HyyPjvsXs4oA+Mv21v2pdR/as+NN/4iLTW3hiw3WWg2EnHkWwJ+dh0Ekh+du4+VckItd9/wTe/ZCb9pn4vrquvWjSeAPDMiXOpl1+S9m6xWgPcNjc+OiKRwXU18hbzx7V+g/7Of/BU7QP2a/hHongTw/8ABPz4bJDJdX7eJwkl9dNgyzuPsZ5Y4wuTtUIuSFFAHpP/AAXEknhX4M2yDy9PA1dgq8KXH2MDI6cA8fU1+cPwZ0/StX+MHgWx10IdEuddsYb4SEBfs7XCCQH22Fq+sv2pP215f+Cguj+GPAekfCaXR/FdtqLXOl3MGuC9klzE4e3WL7MhPmYQjDA7kXrXxBNC9vM8UiNFKhKsjjDKw6gg9COaAP6nURIkVEUKqgBVAwAB04r4Q/4LJado9x+yxpt5fiJdUtvEVsunSHG8u0U3mID1wUDMR0+RT1Ar5N+DP/BYv4j/AA88G2WgeKfDOnePJbGJYINVnu5LW7kQcDzmCuJGAwNwVScZYsck/O/7Vv7Y3jn9rjxFYXvij7Lpuk6YHXT9E04MtvBuI3OSxJd2AUFie3AUZyAeEe1SXrM13Oz/AHy7Fvrk5r279jr9mPWf2pfjLpXhy1t5l8O20iXOvamikJa2gbLDd/ffBRB1yc9FYjxrxAAmvakAMAXMmB/wI0Afs7/wRdsreH9lrxBcpCi3E3iu5EkoHzOFtbXaCfQZOB2yfU19FftwWsV3+yH8XUmjWRB4cu5ArDIDKhZT+BAP4V8+f8EYv+TUNa/7Gy7/APSW0r6I/bY/5NH+L3/Ys3v/AKKagD+cOv6MP2E/m/Y++Ep/6gNv/Wv5z6/ow/YS/wCTPPhJ/wBgGD+tAHvFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB8I/tkNP4g+O2n6ZGcstjbWkQ9Gd3IP5yfyr7msLGLTbG3tIF2QW8axRr6KoAA/IV8UftA2oP7W+gLIcJPc6ZyemPMVf6Gvt+gD82/2n/8AkvHi3/rvH/6JSvLa9S/af/5Lx4t/67x/+iUry2gAr7Q/YK/5FbxX/wBfsP8A6Aa+L6+0P2Cv+RW8V/8AX7D/AOgGgD6mooooAKKKKACvFf2uf2df+GqPgxe+Af8AhIf+EY+0Xdvdf2j9i+17fLfdjy/Mjzn13cV7VXhf7RH7V2m/s121xqPiDwF411nw/bQQzXGv6HZ2stlCZZfKSNmkuY2D7ivG3HzrzzQB8P8A/DjH/qtn/lqf/dtfpZ8MPB//AArj4beE/Cf2z+0P7B0m00v7Z5Xlef5EKReZs3Nt3bc7dxxnGTWZ4C+K6eMPCt5r2s+Gdd+Hlva3HkPB4wjt7WUjCESjy5pF2EvtBLA5UjHrD45+L2l+G/AniDxJoUcHjSXRZltrjTtJ1C3Egm8xEaNndwkbLv3EOwOB64oA9Br80Pij/wAEaf8AhZXxN8XeLv8Ahb/9nf2/q95qv2P/AIRnzfI8+d5fL3/a13bd2N20ZxnAr9GPEXi3RfCFmt5rusafoloziNbjUrpLeMseihnIGfbvXE/GP46aL8Kfg74t+INuIvEln4cidprbT7pCWkV1Roi4yEYFhkEZHpQB4r+w7+wZ/wAMY6t4uvf+E5/4TD+34LaHZ/ZH2HyPKaQ5z58m7Pme2Md819O+LvBmhePvDl9oHiTSbTXNFvU8u4sb+FZYpBnIypHUEAg9QQCMHmtDT7tNQsLa6jBEc8SSqD1AIzXj/wAWP2nrL4b+OU8GaR4N8S/EHxRHpZ1u903wzbxSSWdj5hjEjmWRAzMwIWNCznBOBxkA+SvjN/wRf8D+Jrm4v/hx4rvvBsrksul6lF9vtAeyo+5ZUX3ZpDXgk/8AwRP+LS3oWHxr4LktO8ry3ayD6ILcg/8AfVfsJ4Y1+LxV4b0rW7e2u7SDUbWK7jt7+3aC4iWRA4WSNuUcA4KnkEEV5b+0L+07Y/s46fLqmteBPGWv6Bb2q3d3rXh+ztprS0BfYEkaW4jYNnB4UjDLzQB8TfCX/gifpmn6pFefEfx9Lq9nHydK8P2v2cSHORunkLHb6gID6MK/RH4W/CDwd8FPClv4b8EeH7Pw7o8J3eRaJ80rYALyOctI5AALuS3A5rI+Gvxmg8f+E9Q8Q6l4W8Q/D/TbMCRn8YxW9rvhKBzMpjnkURgHkswx6V2Wk+KNH1+5v7fTNWsdRuLCXybyG0uUle2k/uSBSSjexwaAPEv20/2U/wDhsD4W6V4N/wCEn/4RL7DrUWr/AG3+z/tvmbIJ4vL2ebHjPn7t24/dxjnj450T/giN/Ymt6fqA+M/nfZLiOfy/+EW279rBsZ+2HGcdcV+mGh+K9E8TtdDR9YsNWNrJ5VwLG6SbyX/uvtJ2n2PNU9Z+InhXw9qMlhqvibR9Mv44Guntry/ihlSFRlpCrMCEA5LHgCgDpK8N/bE/Zn/4ax+EH/CDHxJ/wiv/ABMIL/8AtD7D9s/1YcbPL8yPrv67uMdK7nx38bfBPwz1rw1pXibxDaaTfeIrk2unxzNw7BGcsx6ImEI3NgZIGcmt/W/GOgeGEd9Y1vTdJRYHui19dxwAQqyK0h3EYUNJGC3QF15+YUAfmL/w4x/6rZ/5an/3bV3WP+CJd94h1a91TU/jtLfajezvc3N1P4WLSTSuxZ3Ym95JJJJ96/SmLx34bnuNKt4vEOlST6rF5+nxJexlryPGQ8I3fvFx3XIqxr/izRfCsEM+tavYaPBM4iik1C5SBXc9FBcjJ9utAH5g/wDDjH/qtn/lqf8A3bS/8OMz/wBFt/8ALU/+7a/UW+1mx0uGGW8vba0inkSGJ55VRZHb7qqSRknsByapaL418P8AiXSp9U0fXdM1XTICyy3lleRzQxlRlgzqxUYHJyeKAPgL4D/8Ehv+FJ/GHwn46/4Wx/bQ0G+S9/s//hHPI8/b/B5n2ttuc9dp+levftR/8E1Phh+0nqN14ghM3gjxjcZaXV9JiVorpv71xbnCyNzncrIxOMsa+hPhd8YvB/xm0a61TwdrcGs2ltdS2kxiyrxvHI8ZyrAHBMbbWxhgMgkVk/H79oHwt+zb4ItvFnjD7aujTajb6c0tjCJWiaUkCRlLA7FClm25bA4VjgUAfmD4l/4IlfEa1uyNA+IXhfU7fdjzNSiubN9vrtRJhn2z+Ndt8Nv+CI7LfQXHj74lLLZq2ZrDw7YkPIPa4lPy/wDfpq/RfX/jP4b0LxB8PdK82XUD46nlg0e8sQktuwS1e68xn3D5GjT5SobJZegyR0eseMdA8PX1nZarrWm6ZeXrbba3vLuOKSc+iKxBY/TNAHO/Bv4G+CfgD4Pg8M+BtCg0TTIzvkMfzTXMneSaQ5aRz6seBgDAAFfndqH/AAQ+/tDULm6/4XT5fnStIV/4RXO3JzjP23nrX6M/Ez4x+EPg9aaTc+L9bt9Gh1XUIdMtDLkmSaVwq8AHCgsCznCqOSQKdrXxD/s3xh4K0a10yTVLPxL9qYarb3UIhtUih81WKl90gkyAvlhsdTgc0Aea/sYfsuf8MifCi98FDxN/wln2nVptU+3f2f8AYtvmRQps2ebJnHlZ3bud2Mcc+ifGz4bn4w/CPxf4H/tH+yP+Eg0yfTvt/kef9n8xSu/ZuXdjPTcM+tef65+1PZr+0LZfCXw14dfxRqMawza1qMeq2lrDpkcjuuAkjh55F2MzRxgsox1OQPSPAXjt/GieJGm0ebRl0fWbnSVNxcQy/aVh2/v18tm2K244V9rDHIGRQB+bf/DjH/qtn/lqf/dtfov8CPhefgp8HvCPgT+0/wC2f7AsI7H7f9n8jz9v8fl7m259Nx+tdPoPirRvFMM02i6tYavFDIYpZLC5SdUcdVYqTgj061WtvHXhu+1eDS7bxBpc+p3AlMVlFextNIInZJdqBskI6urYHylSDgg0Ab9FFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB8b/ALYtq3hz4x+B/E5XbAYowW7FoJ97fpKtfYwORkEHPQ14H+2b4JbxN8Kf7WgjL3Wh3AuSQMnyW+SQfqjH2Q16L8FPFqeNfhV4Y1ZX8yWSyjinJPPnR/u5P/HkagD4U/afx/wvjxbz/wAt4v8A0THXl1fp9r3wT8DeJ9WuNT1Xw1ZXuoXBDS3EgO5yAAM4PoAPwrP/AOGdPhr/ANCfp3/fLf40AfmjX2d+wYceFvFfH/L7D/6Aa9g/4Z0+Gv8A0J+nf98t/jXT+EfAHh7wHBcQeH9Kt9KiuGDypbggOR0JzQB0FFFFABRRRQAV8y/8FHtC1PxP+xz4707SNPutU1CWbTDHaWUTTSvjUbUnaqgk4AJ+gJr6apu3/GgD5x/4KH6FqPiX9jb4kabpFhdanqNxBaCK1s4WllkxeQE7UUEnABPTtXO/trfBvRvC/wCxN8SPDnw88G2unSXaWBGn6Bp6pJcul3bDcVjXdIwRBljk4WvrHbRtH1oA+N/2k7HQPD37VXh7xb8VvCF34v8Ahe3hKXS9L26LJrNrYaublnlMlsiPteWDy1WQqc7COACR434U8D6hB/wTm/aI0rSfBut6BFe+JtXuNI8PXtjLHeQ2hmtzFH5RG4lUXBxn7p5ODX6V7R6Uu0UAZ3h2J4NA0yKRSkkdtErq3UEIMg1+bvxZ1jxr4L+PXxD8c3Efjq2+Muna2LTwRa2OhXF7oev+HwEMenExLs+ZmkeRmYMj7WHzAiv0zwBQFAoA8W/ZI8a+LPG3wWsp/H9vqdr45s767tdat9UsRaPDP5zSKiADbJEsUkSpIpIZVBJ3bgMX9vzR77Xf2PPifY6ZZXGo302nJ5VtaxGSR8Txk4VQScAE/hX0HgUhQE5Iz9aAPnj9q/RdR1D9h/x1plpY3NzqTeFvLFnDEzzFljTcoQDORg5AHasj4mfAq50H9jDxZ4a+Evhqz8M+MNT8NwQsml2yWlzeSJGgkV3UAvK0fmoC5zufqM5r6eKg+9LtoA/PP9jDwZDe/HfQNe0fW9Qsv7J8Pz2GqaRZfC6XwzaFTsCW15cNOySTRv8AOuFcnY/zCvK/jF4Y8Oaf8D/jR4O8Z/C3XPEPx7vdbv8AVINbg8OzXclzC1wZLe8hvlQhLaODClN4xhl28mv1g2g0bRQB8P8A7Y/ww8Ozp8APGHinwG/iTTNG1GCy8RPb6M+oXCWJtJCsUscaM5iExHBGAzDua7H4q/CbS/iJ+258LH1zwnFrvhbT/CGpyql9YebZRTiaARh0ZdgYB8hWHBwQAQDX1ftH4Umwc+9AH5h6J+z7F4Y/Zbg1nTPAklp42034qxtYXiac32+2tY9ZEUaxNt3pCqlsKuF+Zm6kmu0/bN8K63B+05H4h8TXKW/gK88MLp+k3934EfxbaQXIlZri3MCSKbeaQbGEu07lXbuGw4/QjaMY7UbRmgD4E8a/Bi+n/Y+/Z08D36a94zsI/HmiJejWNHksbtdNe5myk9sXkaFI4pFj5c4VV5HQeo/CD4S6X4a/an+PmgWvhC10v4fa1oOhq+nQ6esWmXLNDcxTKsYURncuQ4A5/i68/VWwUbBnNAHyB/wTr8HaF8PfDvj/AMOR+D5/DHjDT/EF2mqTTaRJai4tjdXDWYSZkCzIsWdu0kBWX+8K7X9tfwnL4z8L/C/TRo763Zn4j+H3v7UW5nj+y/aSJWlUAjy9pO4t8uCc19F7aAoFAH596Z8F/HnwS/av+DPgK0sr3Xvg7Ya1qWseHNVw8r6LHJp9ysunTvg/IrsrRs55V8ZYghaHxQ0nwp4X+J/x6t/jL8M9c8da/wCLXUeEL+z0SbU0ubDyFSCztJUDC1ljl3FuYzkhsn5c/okFApdv1oA+BPj/APBfVp/2N/ghP8RvC8ni7xX4Q1LRW16RLM6jeQWHmIL1DsDPIPLWNZNudxTJyBmvUvHmiQ6h+0J+yJqXhfQ7q08I2NvrjRxx2ElvFp9vJo4W3jkjKjyOMKEcKQRtwCMV9U7RSbBQB8ifDr4B+GrL9vj4oeJG8C2MEUGkaXqen6o2nKES/me5+0TRvtx5rYJYg5JGTzXnV/8ADj4g63+y1+1no3hbTdStvEOrfEnWbuzgWJ45r6xM9o0whBK7xJCkyAKfnyVBya/QHaM570hUGgD4I/Yo8IW118d5/E+h+IL37LbeHDp+oaZY/DGXwppzsJUMUcztMySXMZZsBVJ27/nx19H/AGDvg7o/hzwTrXiXVPB1rY+MZfFmuuurX2nql+IzdyRjZK671QquMAgHng5OfrHbnuaQqD9aAHUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFTVNLttZ067sLyIT2l1E0E0bdGRgQR+RNfOn7NNxc/C7x34o+FOsTEtFKdQ0mV+BPGQNxH1UK2B3Enoa+lq8m+Ofwxv/ABVDpvifwwy2/jbw/J9osZDwLhActA3qDzjPckcBiaAPWaK5P4a/EKz+JPhS31e1RrafcYLyylBElpcL/rImBwcg+oHBBwK6ygAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACmhQKdRQBlaZ4W0nRdV1PUrGxitb3U2R7yWIbTOyAhWYdM/Mee/fNatFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRSZ5xQAtFIDzigkgZoAWikzxn8aM8UALRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/9k=" alt="Horizon Trials" class="logo-img"/>
+    <span class="lt">Horizon Trials</span>
+  </div>
+  <button class="coll-btn" onclick="toggleSB()" title="Collapse">◀</button>
+
+  <nav class="sb-nav">
+    <div class="ss-title">Main</div>
+    <a class="ni active" onclick="showTab('dashboard',this)">
+      <span class="ni-icon">🏠</span><span class="nl">Dashboard</span>
+    </a>
+    <a class="ni" onclick="showTab('trials',this)">
+      <span class="ni-icon">🔬</span><span class="nl">My Matched Trials</span>
+      <span class="nbadge rd">12</span>
+    </a>
+    <a class="ni" onclick="showTab('browse',this)">
+      <span class="ni-icon">🔍</span><span class="nl">Browse All Trials</span>
+    </a>
+    <a class="ni" onclick="showTab('applications',this)">
+      <span class="ni-icon">📋</span><span class="nl">My Applications</span>
+      <span class="nbadge gr">3</span>
+    </a>
+    <div class="ss-title">Health</div>
+    <a class="ni" onclick="showTab('history',this)">
+      <span class="ni-icon">🏥</span><span class="nl">Medical History</span>
+    </a>
+    <a class="ni" onclick="showTab('notifications',this)">
+      <span class="ni-icon">🔔</span><span class="nl">Notifications</span>
+      <span class="nbadge am">5</span>
+    </a>
+    <div class="ss-title">Account</div>
+    <a class="ni" onclick="showTab('profile',this)">
+      <span class="ni-icon">👤</span><span class="nl">Profile</span>
+    </a>
+    <a class="ni" onclick="showTab('settings',this)">
+      <span class="ni-icon">⚙️</span><span class="nl">Settings</span>
+    </a>
+    <a class="ni" href="login.html" style="margin-top:6px;">
+      <span class="ni-icon">🚪</span><span class="nl">Sign Out</span>
+    </a>
+  </nav>
+
+  <div class="sb-user">
+    <div class="uav">P</div>
+    <div class="uinfo">
+      <div class="uname">Patient User</div>
+      <div class="urole">patient@horizon.ca</div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div>
+      <span class="tb-title" id="tbTitle">Dashboard</span>
+      <span class="tb-crumb" id="tbCrumb">/ Overview</span>
+    </div>
+    <div class="tb-sp"></div>
+    <div class="sb-inp">
+      <span style="color:var(--muted);font-size:.88rem;">🔍</span>
+      <input type="text" placeholder="Search trials, conditions…" oninput="if(this.value.length>2)showToast('🔍 Searching: '+this.value)"/>
+    </div>
+    <button class="tb-btn" onclick="showTab('notifications')" title="Notifications">🔔<span class="ndot"></span></button>
+    <button class="tb-btn" title="Help">❓</button>
+    <div class="dd">
+      <div class="tb-av" onclick="toggleDD()">P</div>
+      <div class="ddm" id="profDD">
+        <div class="ddi" onclick="showTab('profile');closeDD()">👤 My Profile</div>
+        <div class="ddi" onclick="showTab('settings');closeDD()">⚙️ Settings</div>
+        <div class="dds"></div>
+        <div class="ddi" onclick="window.location.href='login.html'">🚪 Sign Out</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="tab-panel active" id="panel-dashboard">
+      <div class="wc">
+        <div class="wt">
+          <h2>Welcome back, <span>Patient! 👋</span></h2>
+          <p>Your AI-powered clinical trial matching is active. We've found <strong style="color:var(--green-lt);">12 new trials</strong> matching your profile this week.</p>
+          <div class="btn-row" style="margin-top:12px;">
+            <button class="btn btn-gr" onclick="showTab('trials')">View Matched Trials</button>
+            <button class="btn btn-ol" style="color:#fff;border-color:rgba(255,255,255,.3);" onclick="showTab('history')">Update Medical Profile</button>
+          </div>
+        </div>
+        <div class="mbadge">
+          <div class="mpct">94%</div>
+          <div class="mlbl">AI Match Score</div>
+          <div class="mbar"><div class="mfill"></div></div>
+          <div style="font-size:.68rem;color:rgba(255,255,255,.45);margin-top:7px;">Based on your profile</div>
+        </div>
+      </div>
+
+      <div class="sg">
+        <div class="sc" onclick="showTab('trials')">
+          <div class="sc-top"><div class="sc-icon ic-gr">🔬</div><span class="sc-chg cup">↑ 4 new</span></div>
+          <div class="sc-num">12</div><div class="sc-lbl">Matched Trials</div>
+        </div>
+        <div class="sc" onclick="showTab('applications')">
+          <div class="sc-top"><div class="sc-icon ic-tl">📋</div><span class="sc-chg cup">↑ 1 new</span></div>
+          <div class="sc-num">3</div><div class="sc-lbl">Active Applications</div>
+        </div>
+        <div class="sc" onclick="showTab('notifications')">
+          <div class="sc-top"><div class="sc-icon ic-am">🔔</div><span class="sc-chg cdn">5 unread</span></div>
+          <div class="sc-num">5</div><div class="sc-lbl">New Notifications</div>
+        </div>
+        <div class="sc" onclick="showTab('history')">
+          <div class="sc-top"><div class="sc-icon ic-vi">🏥</div><span class="sc-chg cdn">Update due</span></div>
+          <div class="sc-num">82%</div><div class="sc-lbl">Profile Complete</div>
+        </div>
+      </div>
+
+      <div class="g2">
+        <div class="sc2">
+          <div class="sc2-head">
+            <h3>🎯 Top Matched Trials</h3>
+            <a class="va2" onclick="showTab('trials')">View all →</a>
+          </div>
+          <div class="ti">
+            <div class="tscore hi">97%</div>
+            <div class="tinfo">
+              <div class="ttitle">18F-PSMA-1007 PET/CT in Prostate Cancer – Access Trial</div>
+              <div class="tmeta"><span>📍 University of Alberta</span><span>👥 2,800</span></div>
+              <div class="ttags"><span class="ttag tg-cancer">Cancer</span><span class="ttag tg-prostate">Prostate</span><span class="ttag tg-approved">Approved</span></div>
+            </div>
+            <button class="tbtn" onclick="openModal('18F-PSMA-1007 PET/CT in Prostate Cancer')">Apply</button>
+          </div>
+          <div class="ti">
+            <div class="tscore">94%</div>
+            <div class="tinfo">
+              <div class="ttitle">Optimization of Prostate Biopsy – Micro-Ultrasound Versus MRI (OPTIMUM)</div>
+              <div class="tmeta"><span>📍 University of Alberta</span><span>👥 1,200</span></div>
+              <div class="ttags"><span class="ttag tg-cancer">Cancer</span><span class="ttag tg-prostate">Prostate</span></div>
+            </div>
+            <button class="tbtn app">Applied ✓</button>
+          </div>
+          <div class="ti">
+            <div class="tscore md">88%</div>
+            <div class="tinfo">
+              <div class="ttitle">MR-guided Tumour Boost (MRL-Boost)</div>
+              <div class="tmeta"><span>📍 Princess Margaret Hospital</span><span>👥 40</span></div>
+              <div class="ttags"><span class="ttag tg-cancer">Cancer</span><span class="ttag tg-prostate">Prostate</span></div>
+            </div>
+            <button class="tbtn" onclick="openModal('MR-guided Tumour Boost')">Apply</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sc2">
+            <div class="sc2-head"><h3>🔔 Recent Notifications</h3><a class="va2" onclick="showTab('notifications')">See all →</a></div>
+            <div class="notif-item unr">
+              <div class="ndot2 nd-gr"></div>
+              <div><div class="ntext"><strong>New match!</strong> AI matched you with OPTIMUM trial at 94%.</div><div class="ntime">2 hours ago</div></div>
+            </div>
+            <div class="notif-item unr">
+              <div class="ndot2 nd-tl"></div>
+              <div><div class="ntext">Application to <strong>MIDAS-Prostate</strong> received.</div><div class="ntime">Yesterday</div></div>
+            </div>
+            <div class="notif-item">
+              <div class="ndot2 nd-am"></div>
+              <div><div class="ntext">Reminder: Update your medical history for better matches.</div><div class="ntime">2 days ago</div></div>
+            </div>
+          </div>
+          <div class="sc2">
+            <div class="sc2-head"><h3>📈 Enrollment Progress</h3></div>
+            <div class="ps"><div class="pdot pd-done">✓</div><div class="pinfo"><h4>Profile Created</h4><p>Account registered and verified</p></div></div>
+            <div class="ps"><div class="pdot pd-done">✓</div><div class="pinfo"><h4>Medical History Submitted</h4><p>AI analysis complete</p></div></div>
+            <div class="ps"><div class="pdot pd-active">→</div><div class="pinfo"><h4>Trial Application</h4><p>Under review at research centre</p></div></div>
+            <div class="ps"><div class="pdot pd-pend">4</div><div class="pinfo"><h4>Screening &amp; Approval</h4><p>Awaiting researcher response</p></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCHED TRIALS -->
+    <div class="tab-panel" id="panel-trials">
+      <div class="sc2" style="margin-bottom:18px;">
+        <div class="sc2-head">
+          <h3>🎯 Your AI-Matched Trials</h3>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:.75rem;color:var(--muted);">Sorted by match score</span>
+            <select style="background:var(--bg3);border:1px solid var(--card-border);color:var(--text);border-radius:8px;padding:4px 9px;font-family:'Nunito',sans-serif;font-size:.78rem;outline:none;">
+              <option>All Types</option><option>Prostate Cancer</option><option>Colorectal Cancer</option><option>Lung Cancer</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div class="sb-inp" style="width:100%;">
+            <span style="color:var(--muted);">🔍</span>
+            <input type="text" placeholder="Search matched trials…" oninput="filterTrials(this.value)"/>
+          </div>
+        </div>
+        <div id="trialList"></div>
+      </div>
+    </div>
+
+    <!-- BROWSE -->
+    <div class="tab-panel" id="panel-browse">
+      <div class="sc2">
+        <div class="sc2-head"><h3>🔍 Browse All Clinical Trials</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;">
+          <div class="pf"><label>Cancer Type</label>
+            <select><option>All Types</option><option>Prostate</option><option>Colorectal</option><option>Lung</option><option>Breast</option></select>
+          </div>
+          <div class="pf"><label>Province</label>
+            <select><option>All Provinces</option><option>Ontario</option><option>Alberta</option><option>BC</option><option>Quebec</option></select>
+          </div>
+          <div class="pf"><label>Status</label>
+            <select><option>All</option><option>Approved</option><option>Recruiting</option></select>
+          </div>
+        </div>
+        <div style="text-align:center;padding:36px;">
+          <div style="font-size:2rem;margin-bottom:9px;">🔬</div>
+          <div style="font-size:.88rem;color:var(--muted);margin-bottom:14px;">Browse 500+ clinical trials across Canada</div>
+          <a href="trials.html" class="btn btn-gr" style="text-decoration:none;">View Clinical Trials Directory →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS -->
+    <div class="tab-panel" id="panel-applications">
+      <div class="sc2">
+        <div class="sc2-head"><h3>📋 My Applications</h3></div>
+        <div class="hi"><div class="hi-icon hi-tl">📋</div>
+          <div class="hi-info"><h4>Optimization of Prostate Biopsy – OPTIMUM</h4><p>University of Alberta · Applied Jan 15, 2026</p></div>
+          <span class="badge b-am" style="align-self:center;">Under Review</span>
+        </div>
+        <div class="hi"><div class="hi-icon hi-gr">📋</div>
+          <div class="hi-info"><h4>MIDAS-Prostate – Radiation Dose Escalation Trial</h4><p>Princess Margaret Cancer Center · Applied Dec 20, 2025</p></div>
+          <span class="badge b-tl" style="align-self:center;">Screening</span>
+        </div>
+        <div class="hi"><div class="hi-icon hi-am">📋</div>
+          <div class="hi-info"><h4>De-escalated Dose SBRT – DESTINATION-MRL</h4><p>Sunnybrook Health Sciences · Applied Nov 5, 2025</p></div>
+          <span class="badge b-gr" style="align-self:center;">Approved ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDICAL HISTORY -->
+    <div class="tab-panel" id="panel-history">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;">
+        <div class="sc2">
+          <div class="sc2-head"><h3>🏥 Medical History</h3>
+            <button class="btn btn-gr btn-sm" onclick="showToast('✓ Profile saved!')">Save Changes</button>
+          </div>
+          <div class="pf"><label>Primary Diagnosis</label><input type="text" value="Prostate Cancer – Stage II"/></div>
+          <div class="fr">
+            <div class="pf"><label>Date of Diagnosis</label><input type="date" value="2023-06-15"/></div>
+            <div class="pf"><label>Cancer Stage</label>
+              <select><option>Stage I</option><option selected>Stage II</option><option>Stage III</option><option>Stage IV</option></select>
+            </div>
+          </div>
+          <div class="pf"><label>Previous Treatments</label><textarea>Radical prostatectomy (2023), Hormonal therapy (ongoing)</textarea></div>
+          <div class="pf"><label>Current Medications</label><textarea>Enzalutamide 160mg daily, Calcium supplement</textarea></div>
+          <div class="fr">
+            <div class="pf"><label>PSA Level (ng/mL)</label><input type="number" value="4.2"/></div>
+            <div class="pf"><label>Allergies</label><input type="text" value="Penicillin"/></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-gr" onclick="showToast('✓ Medical history updated!')">Update History</button>
+            <button class="btn btn-ol">Cancel</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sc2">
+            <div class="sc2-head"><h3>📅 Recent Records</h3></div>
+            <div class="hi"><div class="hi-icon hi-tl">🩺</div>
+              <div class="hi-info"><h4>Oncology Consultation</h4><p>Dr. Sarah Chen – PMH Toronto</p></div>
+              <div class="hi-date">Jan 20, 2026</div>
+            </div>
+            <div class="hi"><div class="hi-icon hi-am">🧪</div>
+              <div class="hi-info"><h4>PSA Blood Test</h4><p>Result: 4.2 ng/mL (↓ from 5.1)</p></div>
+              <div class="hi-date">Jan 10, 2026</div>
+            </div>
+            <div class="hi"><div class="hi-icon hi-gr">📷</div>
+              <div class="hi-info"><h4>MRI Scan – Prostate</h4><p>No new lesions detected</p></div>
+              <div class="hi-date">Dec 15, 2025</div>
+            </div>
+          </div>
+          <div class="sc2">
+            <div class="sc2-head"><h3>📊 Profile Completeness</h3></div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:5px;">
+                <span style="color:var(--muted);">Overall</span><span style="color:var(--green);font-weight:800;">82%</span>
+              </div>
+              <div style="height:8px;background:var(--bg3);border-radius:4px;">
+                <div style="height:100%;width:82%;background:linear-gradient(90deg,var(--green-dk),var(--green-lt));border-radius:4px;"></div>
+              </div>
+            </div>
+            <div style="font-size:.75rem;color:var(--muted);margin-bottom:10px;">Missing: Genetic markers, Family history, ECOG status</div>
+            <button class="btn btn-ol btn-sm" onclick="showToast('Complete your profile for better matches!')">Complete Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="tab-panel" id="panel-notifications">
+      <div class="sc2">
+        <div class="sc2-head">
+          <h3>🔔 All Notifications</h3>
+          <button class="btn btn-ol btn-sm" onclick="showToast('All notifications marked as read')">Mark all read</button>
+        </div>
+        <div class="notif-item unr">
+          <div class="ndot2 nd-gr"></div>
+          <div style="flex:1;">
+            <div class="ntext"><strong>New match!</strong> AI matched you with 18F-PSMA-1007 Access Trial at 97%.</div>
+            <div class="ntime">2 hours ago · <a onclick="showTab('trials')" style="color:var(--green);cursor:pointer;font-weight:700;">View Trial</a></div>
+          </div>
+          <span class="badge b-gr">New Match</span>
+        </div>
+        <div class="notif-item unr">
+          <div class="ndot2 nd-tl"></div>
+          <div style="flex:1;">
+            <div class="ntext">Application to <strong>MIDAS-Prostate</strong> moved to Screening stage.</div>
+            <div class="ntime">Yesterday · <a onclick="showTab('applications')" style="color:var(--green);cursor:pointer;font-weight:700;">View Application</a></div>
+          </div>
+          <span class="badge b-tl">Status Update</span>
+        </div>
+        <div class="notif-item unr">
+          <div class="ndot2 nd-am"></div>
+          <div style="flex:1;">
+            <div class="ntext">Reminder: Your medical history hasn't been updated in 30 days.</div>
+            <div class="ntime">2 days ago · <a onclick="showTab('history')" style="color:var(--green);cursor:pointer;font-weight:700;">Update Now</a></div>
+          </div>
+          <span class="badge b-am">Reminder</span>
+        </div>
+        <div class="notif-item unr">
+          <div class="ndot2 nd-gr"></div>
+          <div style="flex:1;">
+            <div class="ntext">Congratulations! Application to <strong>DESTINATION-MRL</strong> has been <strong>approved</strong>.</div>
+            <div class="ntime">3 days ago</div>
+          </div>
+          <span class="badge b-gr">Approved!</span>
+        </div>
+        <div class="notif-item unr">
+          <div class="ndot2 nd-rd"></div>
+          <div style="flex:1;">
+            <div class="ntext">5 new clinical trials added to our database that match your profile.</div>
+            <div class="ntime">5 days ago · <a onclick="showTab('browse')" style="color:var(--green);cursor:pointer;font-weight:700;">Browse Trials</a></div>
+          </div>
+          <span class="badge b-tl">New Trials</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="tab-panel" id="panel-profile">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;">
+        <div class="sc2">
+          <div class="sc2-head"><h3>👤 Personal Information</h3>
+            <button class="btn btn-gr btn-sm" onclick="showToast('✓ Profile saved!')">Save</button>
+          </div>
+          <div style="text-align:center;margin-bottom:20px;">
+            <div class="prof-av">P</div>
+            <button class="btn btn-ol btn-sm" onclick="showToast('Photo upload coming soon!')">Change Photo</button>
+          </div>
+          <div class="fr">
+            <div class="pf"><label>First Name</label><input type="text" value="Patient"/></div>
+            <div class="pf"><label>Last Name</label><input type="text" value="User"/></div>
+          </div>
+          <div class="pf"><label>Email Address</label><input type="email" value="patient@horizon.ca"/></div>
+          <div class="fr">
+            <div class="pf"><label>Phone</label><input type="tel" value="+1 587-664-4986"/></div>
+            <div class="pf"><label>Date of Birth</label><input type="date" value="1965-03-15"/></div>
+          </div>
+          <div class="fr">
+            <div class="pf"><label>Gender</label>
+              <select><option selected>Male</option><option>Female</option><option>Other</option></select>
+            </div>
+            <div class="pf"><label>Province</label>
+              <select><option>Alberta</option><option selected>Ontario</option><option>BC</option><option>Quebec</option></select>
+            </div>
+          </div>
+          <div class="pf"><label>City</label><input type="text" value="Whitby"/></div>
+          <div class="btn-row">
+            <button class="btn btn-gr" onclick="showToast('✓ Profile updated!')">Update Profile</button>
+            <button class="btn btn-ol">Discard</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sc2">
+            <div class="sc2-head"><h3>🔒 Security</h3></div>
+            <div class="pf"><label>Current Password</label><input type="password" value="password"/></div>
+            <div class="pf"><label>New Password</label><input type="password" placeholder="Enter new password"/></div>
+            <div class="pf"><label>Confirm Password</label><input type="password" placeholder="Confirm new password"/></div>
+            <button class="btn btn-gr" onclick="showToast('✓ Password changed!')">Change Password</button>
+          </div>
+          <div class="sc2">
+            <div class="sc2-head"><h3>🗑️ Danger Zone</h3></div>
+            <p style="font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.6;">Permanently delete your account. This action cannot be undone.</p>
+            <button class="btn btn-rd" onclick="showToast('⚠️ Contact support to delete account')">Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="tab-panel" id="panel-settings">
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;">
+        <div class="sc2">
+          <div class="sc2-head"><h3>🔔 Notification Preferences</h3></div>
+          <div class="trow"><div class="tinfo"><h4>New Trial Matches</h4><p>Get notified when AI finds new matching trials</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow"><div class="tinfo"><h4>Application Updates</h4><p>Status changes on your applications</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow"><div class="tinfo"><h4>Profile Reminders</h4><p>Reminders to keep your profile up to date</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow"><div class="tinfo"><h4>Newsletter &amp; Blog</h4><p>Clinical trial news and research updates</p></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+          <div class="trow"><div class="tinfo"><h4>SMS Notifications</h4><p>Critical alerts via text message</p></div><div class="tog" onclick="this.classList.toggle('on')"></div></div>
+          <div class="btn-row"><button class="btn btn-gr" onclick="showToast('✓ Notification settings saved!')">Save Preferences</button></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div class="sc2">
+            <div class="sc2-head"><h3>🤖 AI Matching Settings</h3></div>
+            <div class="trow"><div class="tinfo"><h4>Auto-matching</h4><p>Automatically match new trials to your profile</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="trow"><div class="tinfo"><h4>Match Threshold 80%+</h4><p>Only show trials above 80% match</p></div><div class="tog on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="pf" style="margin-top:12px;"><label>Maximum Travel Distance</label>
+              <select><option>25 km</option><option selected>100 km</option><option>250 km</option><option>Anywhere in Canada</option></select>
+            </div>
+            <button class="btn btn-gr btn-sm" onclick="showToast('✓ AI settings updated!')">Update</button>
+          </div>
+          <div class="sc2">
+            <div class="sc2-head"><h3>🌐 Language &amp; Region</h3></div>
+            <div class="pf"><label>Language</label><select><option selected>English</option><option>French</option></select></div>
+            <div class="pf"><label>Timezone</label><select><option selected>Eastern Time (ET)</option><option>Central (CT)</option><option>Mountain (MT)</option><option>Pacific (PT)</option></select></div>
+            <button class="btn btn-gr btn-sm" onclick="showToast('✓ Regional settings saved!')">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="applyModal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhead">
+      <h3>Apply for Clinical Trial</h3>
+      <button class="mc" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modalName" style="background:rgba(16,185,129,.08);border-radius:10px;padding:10px 14px;margin-bottom:18px;font-size:.86rem;font-weight:700;color:var(--green-dk);"></div>
+    <div class="pf"><label>Full Name</label><input type="text" value="Patient User"/></div>
+    <div class="pf"><label>Email Address</label><input type="email" value="patient@horizon.ca"/></div>
+    <div class="pf"><label>Phone Number</label><input type="tel" placeholder="+1 (xxx) xxx-xxxx"/></div>
+    <div class="pf"><label>Primary Diagnosis</label><input type="text" value="Prostate Cancer – Stage II"/></div>
+    <div class="pf"><label>Additional Information</label><textarea placeholder="Any relevant information…"></textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-gr" onclick="submitApp()">Submit Application</button>
+      <button class="btn btn-ol" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div style="width:30px;height:30px;border-radius:8px;background:rgba(16,185,129,.12);display:flex;align-items:center;justify-content:center;">✓</div>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const trialData = [
+  {score:97,title:"18F-PSMA-1007 PET/CT in Prostate Cancer – Access Trial 2022–2028",loc:"University of Alberta",enroll:"2,800",tags:["Cancer","Prostate"],cls:"hi",applied:false},
+  {score:94,title:"Optimization of Prostate Biopsy – Micro-Ultrasound Versus MRI (OPTIMUM)",loc:"University of Alberta",enroll:"1,200",tags:["Cancer","Prostate"],cls:"",applied:true},
+  {score:91,title:"Molecular Imaging Informed Radiation Dose Escalation (MIDAS-Prostate)",loc:"Princess Margaret Cancer Center",enroll:"60",tags:["Cancer","Prostate"],cls:"",applied:false},
+  {score:88,title:"MR-guided Tumour Boost (MRL-Boost)",loc:"Princess Margaret Hospital",enroll:"40",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:85,title:"2 Ablative RadioTherapy Treatments for Prostate Cancer (EARTH)",loc:"Sunnybrook Health Sciences",enroll:"30",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:82,title:"De-escalated Dose SBRT – DESTINATION-MRL",loc:"Sunnybrook Health Sciences",enroll:"20",tags:["Cancer","Prostate"],cls:"md",applied:true},
+  {score:79,title:"Multi-modality Imaging Using Sodium MRI and PSMA PET (IGPC-5)",loc:"London Health Sciences Centre",enroll:"45",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:76,title:"Using Rectal Hydrogel Spacer for Salvage SABR (FIRST STAR)",loc:"Sunnybrook Odette Cancer Centre",enroll:"10",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:73,title:"Reducing Sedentary Behaviour Among Prostate Cancer Survivors",loc:"University of Toronto",enroll:"120",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:70,title:"Phase II Brachytherapy as Monotherapy in Localized Prostate Cancer",loc:"Ottawa Hospital Research Institute",enroll:"232",tags:["Cancer","Prostate"],cls:"md",applied:false},
+  {score:67,title:"A Study of QBECO Versus Placebo in Colorectal Cancer (PERIOP-06)",loc:"Sunnybrook Health Science Centre",enroll:"115",tags:["Cancer","Colorectal"],cls:"md",applied:false},
+  {score:64,title:"Living Donor Liver Transplantation for Unresectable Colorectal Cancer",loc:"Toronto General Hospital",enroll:"20",tags:["Cancer","Colorectal"],cls:"md",applied:false},
+];
+
+function renderTrials(list) {
+  document.getElementById('trialList').innerHTML = list.map(t => `
+    <div class="ti">
+      <div class="tscore ${t.cls}">${t.score}%</div>
+      <div class="tinfo">
+        <div class="ttitle">${t.title}</div>
+        <div class="tmeta"><span>📍 ${t.loc}</span><span>👥 ${t.enroll}</span></div>
+        <div class="ttags">${t.tags.map(tg=>`<span class="ttag tg-${tg.toLowerCase()}">${tg}</span>`).join('')}<span class="ttag tg-approved">Approved</span></div>
+      </div>
+      ${t.applied ? `<button class="tbtn app">Applied ✓</button>` : `<button class="tbtn" onclick="openModal('${t.title.replace(/'/g,"\\'")}')"  >Apply</button>`}
+    </div>`).join('');
+}
+renderTrials(trialData);
+
+function filterTrials(q) {
+  const lq = q.toLowerCase();
+  renderTrials(trialData.filter(t => t.title.toLowerCase().includes(lq) || t.loc.toLowerCase().includes(lq)));
+}
+
+function toggleSB() {
+  const s = document.getElementById('sidebar');
+  s.classList.toggle('collapsed');
+  document.querySelector('.coll-btn').textContent = s.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+const tabTitles = {dashboard:'Dashboard',trials:'My Matched Trials',browse:'Browse All Trials',
+  applications:'My Applications',history:'Medical History',notifications:'Notifications',
+  profile:'Profile',settings:'Settings'};
+const tabCrumbs = {dashboard:'/ Overview',trials:'/ Matched Trials',browse:'/ Browse',
+  applications:'/ Applications',history:'/ Medical History',notifications:'/ Notifications',
+  profile:'/ Profile',settings:'/ Settings'};
+
+function showTab(id, navEl) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  document.getElementById('tbTitle').textContent = tabTitles[id] || id;
+  document.getElementById('tbCrumb').textContent = tabCrumbs[id] || '';
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  closeDD();
+}
+
+function toggleDD() { document.getElementById('profDD').classList.toggle('open'); }
+function closeDD() { document.getElementById('profDD').classList.remove('open'); }
+document.addEventListener('click', e => { if (!e.target.closest('.dd')) closeDD(); });
+
+function openModal(name) {
+  document.getElementById('modalName').textContent = '🔬 ' + name;
+  document.getElementById('applyModal').classList.add('open');
+}
+function closeModal() { document.getElementById('applyModal').classList.remove('open'); }
+function submitApp() {
+  closeModal();
+  showToast('✅ Application submitted successfully!');
+}
+
+let tt;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
